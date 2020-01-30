@@ -1,0 +1,3 @@
+[submodule "LIG_Tool"]
+	path = LIG_Tool
+	url = https://github.com/realbigws/LIG_Tool

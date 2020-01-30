@@ -1,0 +1,6 @@
+[note]: source file Ligand_Utility.cpp should be updated each week by the following command,
+
+./Chemical_Component_Dictionary components.cif Ligand_Utility.cpp
+
+Where components.cif could be downloaded from ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif
+
