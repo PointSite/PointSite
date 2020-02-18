@@ -47,8 +47,9 @@ You will get .obj file in output folder, please use [MeshLab](http://www.meshlab
 
 
 ## Training and Testing Data
-Users may find the training data [here](https://github.com/PointSite/PointSite_TrainData).
-Users may locate the testing data [here](https://github.com/PointSite/PointSite_TestData).
+Users may find the training data [here](https://drive.google.com/drive/folders/1iqe1741ohxh4b3p6wk3toDgS-IVTPXtq?usp=sharing); <br>
+Users may find the test data [here](https://drive.google.com/drive/folders/1-y5JNjPgZvxdiY-U0w1oTQBJn5cexC02?usp=sharing); <br>
+Users may find the evaluation results [here](https://drive.google.com/drive/folders/1siev2t-DIAtGRk8u1K7TSnTUtsw1Btnd?usp=sharing). 
 
 
 ## Reference
