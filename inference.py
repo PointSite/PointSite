@@ -100,6 +100,7 @@ def main(args):
 
     def predict_binding_site(chain_coords, chain_feature, random_seed=1):
         vote_pool = torch.zeros(chain_coords.shape[0], 2)
+        vote_num = torch.zeros(chain_coords.shape[0], 2)
 
         chain_coords_news = []
         chain_features = []
@@ -109,7 +110,6 @@ def main(args):
         for se in range(args.num_vote):
             seed = random_seed * se
             m = np.eye(3)
-            np.random.seed(seed)
             m[0][0] *= np.random.randint(0, 2) * 2 - 1
             m *= scale
             np.random.seed(seed)
@@ -125,7 +125,8 @@ def main(args):
                 full_scale - Max + Min + 0.001, None, 0) * np.random.rand(3)
             chain_coords_new += offset
             idxs = (chain_coords_new.min(1) >= 0) * (chain_coords_new.max(1) < full_scale)
-            chain_coords_news.append(torch.Tensor(chain_coords_new[idxs]))
+            coords = torch.Tensor(chain_coords_new[idxs]).long()
+            chain_coords_news.append(torch.cat([coords, torch.LongTensor(coords.shape[0], 1).fill_(se)], 1))
             chain_features.append(torch.Tensor(chain_feature[idxs]))
             chain_point_id.append(torch.Tensor(np.nonzero(idxs)[0]))
 
@@ -139,7 +140,8 @@ def main(args):
         predictions = classifier([chain_coords_news, chain_features])
         predictions = torch.nn.functional.softmax(predictions)
         vote_pool.index_add_(0, chain_point_ids, predictions.cpu())
-        vote_pool = vote_pool / args.num_vote
+        vote_num.index_add_(0, chain_point_ids, torch.ones_like(predictions.cpu()))
+        vote_pool = vote_pool / vote_num
 
         return vote_pool
 
@@ -164,7 +166,10 @@ def main(args):
     print('#classifer parameters: %d' % (sum([x.nelement() for x in classifier.parameters()])))
     try:
         print('Load model %s' % model_path)
-        classifier.load_state_dict(torch.load(os.path.join(model_path,'scale_80.pth')))
+        if use_cuda:
+            classifier.load_state_dict(torch.load(os.path.join(model_path,'scale_80.pth')))
+        else:
+            classifier.load_state_dict(torch.load(os.path.join(model_path, 'scale_80.pth'), map_location='cpu'))
     except:
         raise ValueError('Cannot load pretrain model from %s!!!' % model_path)
 
@@ -207,7 +212,7 @@ def main(args):
 
             label[label != 0] = 1
             data_output = np.loadtxt(protein, dtype=str)
-            data_output[:,5] = atom_choose
+            data_output[:,5] = confident_map
             data_output = data_output.astype(str)
             np.savetxt(os.path.join(pro_base_dir, '%s_output.xyz' % pro),data_output,fmt='%s')
 
