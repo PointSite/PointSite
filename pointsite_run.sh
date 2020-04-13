@@ -21,7 +21,10 @@ mkdir -p $outdir
 outdir=`readlink -f $outdir`
 fulnam=`basename $data`
 relnam=${fulnam%.*}
-tmpdir=$outdir/tmp_${relnam}_xyz
+
+#----- create tmp ----#
+DATE=`date '+%s%N' | cut -b10-19`
+tmpdir=$outdir/tmp_${relnam}_${RANDOM}_${DATE}_xyz
 mkdir -p $tmpdir
 
 #----- make absolute dir ---#
@@ -31,7 +34,8 @@ indir=`readlink -f $indir`
 #----- convert PDB to XYZ files ---#
 for i in `cat $data`
 do
-	$home/LIG_Tool/util/PDB_To_XYZ -i $indir/$i.pdb -a 1 -o $tmpdir/${i}_atom.xyz
+	$home/util/PDB_Tool -i $indir/$i.pdb -r _ -R 1 -o $tmpdir/$i.pdb
+	$home/util/PDB_To_XYZ -i $tmpdir/$i.pdb -a 1 -o $tmpdir/${i}_atom.xyz
 done
 
 #----- run pointsite --------#
