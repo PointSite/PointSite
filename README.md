@@ -31,6 +31,8 @@ python inference.py
 ## Running Example
 ```
 conda activate pointsite_inference
+chmod +x ./util/PDB_Tool
+chmod +x ./util/PDB_To_XYZ
 python inference.py --output blind_out --data example/blind --select_list example/blind_list
 conda deactivate
 ```
