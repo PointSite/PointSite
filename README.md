@@ -37,6 +37,7 @@ conda deactivate
 
 Note that the above input data (in '.XYZ' format) contain the ground-truth label of binding atoms. Run below script for identifying binding atoms on unlabeled data in '.PDB' files.
 ```
+chmod +x ./pointsite_run.sh
 ./pointsite_run.sh example/blind_list example/blind blind_out `pwd`
 ```
 
