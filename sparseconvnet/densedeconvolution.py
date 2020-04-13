@@ -10,7 +10,7 @@ from torch.nn import Module, Parameter
 from .utils import *
 from .sparseConvNetTensor import SparseConvNetTensor
 
-class Deconvolution(Module):
+class DenseDeconvolution(Module):
     def __init__(self, dimension, nIn, nOut, filter_size, filter_stride, bias, groups=1):
         Module.__init__(self)
         self.dimension = dimension
@@ -28,25 +28,8 @@ class Deconvolution(Module):
         if bias:
             self.bias = Parameter(torch.Tensor(nOut).zero_())
 
-    def forward(self, input):
-        assert input.features.nelement() == 0 or input.features.size(1) == self.nIn
-        output = SparseConvNetTensor()
-        output.metadata = input.metadata
-        output.spatial_size =\
-            (input.spatial_size - 1) * self.filter_stride + self.filter_size
-        output.features = DeconvolutionFunction.apply(
-            input.features,
-            self.weight,
-            optionalTensor(self, 'bias'),
-            input.metadata,
-            input.spatial_size,
-            output.spatial_size,
-            self.dimension,
-            self.filter_size,
-            self.filter_stride)
-        return output
 
-    def fullForward(self, input):
+    def forward(self, input):
         assert input.features.nelement()==0 or input.features.size(1) == self.nIn
         output = SparseConvNetTensor()
         output.metadata = Metadata(self.dimension)
@@ -88,68 +71,63 @@ class Deconvolution(Module):
                 self.filter_size == out_size).all()
         return in_size
 
-class DeconvolutionFunction(Function):
+class FullConvolutionFunction(Function):
     @staticmethod
     def forward(
-            ctx,
+        ctx,
+        input_features,
+        weight,
+        bias,
+        input_metadata,
+        output_metadata,
+        input_spatial_size,
+        output_spatial_size,
+        dimension,
+        filter_size,
+        filter_stride):
+        output_features=input_features.new()
+        ctx.input_metadata=input_metadata
+        ctx.output_metadata=output_metadata
+        ctx.dimension=dimension
+        ctx.save_for_backward(
             input_features,
+            input_spatial_size,
             weight,
             bias,
-            input_metadata,
-            input_spatial_size,
             output_spatial_size,
-            dimension,
             filter_size,
-            filter_stride):
-        ctx.input_metadata = input_metadata
-        output_features = input_features.new()
-        ctx.dimension = dimension
-
+            filter_stride)
         sparseconvnet.forward_pass_multiplyAdd_count +=\
-            sparseconvnet.SCN.Deconvolution_updateOutput(
+            sparseconvnet.SCN.FullConvolution_updateOutput(
                 input_spatial_size,
                 output_spatial_size,
                 filter_size,
                 filter_stride,
                 input_metadata,
+                output_metadata,
                 input_features,
                 output_features,
                 weight,
                 bias)
         sparseconvnet.forward_pass_hidden_states += output_features.nelement()
-        ctx.save_for_backward(input_features,
-                              output_features,
-                              input_spatial_size,
-                              weight,
-                              bias,
-                              output_spatial_size,
-                              filter_size,
-                              filter_stride)
         return output_features
-
     @staticmethod
     def backward(ctx, grad_output):
-        input_features,\
-            output_features,\
-            input_spatial_size,\
-            weight,\
-            bias,\
-            output_spatial_size,\
-            filter_size,\
-            filter_stride = ctx.saved_tensors
+        input_features, input_spatial_size, weight, bias, output_spatial_size, filter_size, filter_stride = ctx.saved_tensors
         grad_input = grad_output.new()
         grad_weight = torch.zeros_like(weight)
         grad_bias = torch.zeros_like(bias)
-        sparseconvnet.SCN.Deconvolution_backward(
+        sparseconvnet.SCN.FullConvolution_backward(
             input_spatial_size,
             output_spatial_size,
             filter_size,
             filter_stride,
             ctx.input_metadata,
+            ctx.output_metadata,
             input_features,
             grad_input,
             grad_output.contiguous(),
             weight,
             grad_weight,
             grad_bias)
-        return grad_input, grad_weight, optionalTensorReturn(grad_bias), None, None, None, None, None, None
+        return grad_input, grad_weight, optionalTensorReturn(grad_bias), None, None, None, None, None, None, None

@@ -5,11 +5,12 @@
 // LICENSE file in the root directory of this source tree.
 
 template <typename T>
-void cpu_LeakyReLU_updateOutput(/*float*/ at::Tensor input_features,
-                                /*float*/ at::Tensor output_features, T alpha) {
+void cpu_LeakyReLU_updateOutput(/*float*/ at::Tensor &input_features,
+                                /*float*/ at::Tensor &output_features,
+                                T alpha) {
   output_features.resize_as_(input_features);
-  auto iF = input_features.data<T>();
-  auto oF = output_features.data<T>();
+  auto iF = input_features.data_ptr<T>();
+  auto oF = output_features.data_ptr<T>();
   auto n = input_features.numel();
 
   for (Int i = 0; i < n; i++) {
@@ -19,14 +20,14 @@ void cpu_LeakyReLU_updateOutput(/*float*/ at::Tensor input_features,
   }
 }
 template <typename T>
-void cpu_LeakyReLU_updateGradInput(/*float*/ at::Tensor input_features,
-                                   /*float*/ at::Tensor d_input_features,
-                                   /*float*/ at::Tensor d_output_features,
+void cpu_LeakyReLU_updateGradInput(/*float*/ at::Tensor &input_features,
+                                   /*float*/ at::Tensor &d_input_features,
+                                   /*float*/ at::Tensor &d_output_features,
                                    T alpha) {
   d_input_features.resize_as_(d_output_features);
-  auto iF = input_features.data<T>();
-  auto diF = d_input_features.data<T>();
-  auto doF = d_output_features.data<T>();
+  auto iF = input_features.data_ptr<T>();
+  auto diF = d_input_features.data_ptr<T>();
+  auto doF = d_output_features.data_ptr<T>();
   auto n = d_input_features.numel();
 
   for (Int i = 0; i < n; i++) {

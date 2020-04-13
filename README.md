@@ -7,7 +7,7 @@ Created by [Zhen Li](https://github.com/icemansina),  [Xu Yan](https://github.co
 
 ## Setup
 
-Tested with CUDA 9.0, Ubuntu 18.04, Python 3.6 with [Conda](https://www.anaconda.com/) and PyTorch 1.1.
+Tested with CUDA 10.0, Ubuntu 18.04, Python 3.6 with [Conda](https://www.anaconda.com/) and PyTorch 1.3.
 
 ```
 git clone --recursive https://github.com/PointSite/PointSite_Inference.git

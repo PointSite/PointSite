@@ -108,11 +108,11 @@ void BatchNormalization_BackwardPass(T *input_features, T *d_input_features,
 
 template <typename T>
 void cpu_BatchNormalization_updateOutput(
-    /*float*/ at::Tensor input_features, /*float*/ at::Tensor output_features,
-    /*float*/ at::Tensor saveMean,
-    /*float*/ at::Tensor saveInvStd, /*float*/ at::Tensor runningMean,
-    /*float*/ at::Tensor runningVar,
-    /*float*/ at::Tensor weight, /*float*/ at::Tensor bias, T eps, T momentum,
+    /*float*/ at::Tensor &input_features, /*float*/ at::Tensor &output_features,
+    /*float*/ at::Tensor &saveMean,
+    /*float*/ at::Tensor &saveInvStd, /*float*/ at::Tensor &runningMean,
+    /*float*/ at::Tensor &runningVar,
+    /*float*/ at::Tensor &weight, /*float*/ at::Tensor &bias, T eps, T momentum,
     bool train, T leakiness) {
   output_features.resize_as_(input_features);
   if (input_features.ndimension() == 2) {
@@ -121,9 +121,9 @@ void cpu_BatchNormalization_updateOutput(
     auto input_stride = input_features.stride(0);
     auto output_stride = output_features.stride(0);
     BatchNormalization_ForwardPass<T>(
-        input_features.data<T>(), output_features.data<T>(), nPlanes,
-        input_stride, output_stride, nActive, saveMean.data<T>(),
-        saveInvStd.data<T>(), runningMean.data<T>(), runningVar.data<T>(),
+        input_features.data_ptr<T>(), output_features.data_ptr<T>(), nPlanes,
+        input_stride, output_stride, nActive, saveMean.data_ptr<T>(),
+        saveInvStd.data_ptr<T>(), runningMean.data_ptr<T>(), runningVar.data_ptr<T>(),
         OptionalTensorData<T>(weight), OptionalTensorData<T>(bias), eps,
         momentum, train, leakiness);
   }
@@ -131,13 +131,14 @@ void cpu_BatchNormalization_updateOutput(
 
 template <typename T>
 void cpu_BatchNormalization_backward(
-    /*float*/ at::Tensor input_features, /*float*/ at::Tensor d_input_features,
-    /*float*/ at::Tensor output_features,
-    /*float*/ at::Tensor d_output_features, /*float*/ at::Tensor saveMean,
-    /*float*/ at::Tensor saveInvStd, /*float*/ at::Tensor runningMean,
-    /*float*/ at::Tensor runningVar,
-    /*float*/ at::Tensor weight, /*float*/ at::Tensor bias,
-    /*float*/ at::Tensor d_weight, /*float*/ at::Tensor d_bias, T leakiness) {
+    /*float*/ at::Tensor &input_features,
+    /*float*/ at::Tensor &d_input_features,
+    /*float*/ at::Tensor &output_features,
+    /*float*/ at::Tensor &d_output_features, /*float*/ at::Tensor &saveMean,
+    /*float*/ at::Tensor &saveInvStd, /*float*/ at::Tensor &runningMean,
+    /*float*/ at::Tensor &runningVar,
+    /*float*/ at::Tensor &weight, /*float*/ at::Tensor &bias,
+    /*float*/ at::Tensor &d_weight, /*float*/ at::Tensor &d_bias, T leakiness) {
 
   d_input_features.resize_as_(input_features);
   if (input_features.ndimension() == 2) {
@@ -146,13 +147,12 @@ void cpu_BatchNormalization_backward(
     auto input_stride = input_features.stride(0);
     auto output_stride = output_features.stride(0);
     BatchNormalization_BackwardPass<T>(
-        input_features.data<T>(), d_input_features.data<T>(),
-        output_features.data<T>(), d_output_features.data<T>(), nPlanes,
-        input_stride, output_stride, nActive, saveMean.data<T>(),
-        saveInvStd.data<T>(), runningMean.data<T>(), runningVar.data<T>(),
+        input_features.data_ptr<T>(), d_input_features.data_ptr<T>(),
+        output_features.data_ptr<T>(), d_output_features.data_ptr<T>(), nPlanes,
+        input_stride, output_stride, nActive, saveMean.data_ptr<T>(),
+        saveInvStd.data_ptr<T>(), runningMean.data_ptr<T>(), runningVar.data_ptr<T>(),
         OptionalTensorData<T>(weight), OptionalTensorData<T>(bias),
         OptionalTensorData<T>(d_weight), OptionalTensorData<T>(d_bias),
         leakiness);
   }
 }
-

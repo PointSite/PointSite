@@ -318,7 +318,7 @@ def FullConvolutionalNetIntegratedLinear(dimension, reps, nPlanes, nClasses=-1, 
         return x+nPlanes
     def foo(m,np):
         for _ in range(reps):
-            if residual_blocks: #ResNet style blocks
+            if residual: #ResNet style blocks
                 m.add(scn.ConcatTable()
                       .add(scn.Identity())
                       .add(scn.Sequential()
@@ -346,6 +346,6 @@ def FullConvolutionalNetIntegratedLinear(dimension, reps, nPlanes, nClasses=-1, 
                 scn.Convolution(dimension, nPlanes[0], nPlanes[1], downsample[0], downsample[1], False),
                 baz(nPlanes[1:]),
                 scn.UnPooling(dimension, downsample[0], downsample[1]))
-            m.add(ConcatTable(a,b))
+            m.add(scn.ConcatTable(a,b))
             m.add(scn.AddTable())
-    return baz(depth,nPlanes)
+        return baz(depth,nPlanes)

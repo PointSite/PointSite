@@ -100,7 +100,7 @@ class InputBatch(SparseConvNetTensor):
 
     def setLocations_(self, locations, vector, overwrite=False):
         self.metadata.setInputSpatialLocations(
-            self.features, locations, vectors, overwrite)
+            self.features, locations, vector, overwrite)
 
     def addSampleFromTensor(self, tensor, offset, threshold=0):
         self.metadata.addSampleFromThresholdedTensor(

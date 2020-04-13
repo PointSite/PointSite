@@ -134,23 +134,23 @@ def prepare_BLInput(l,f):
             F[i,:ff.size(0),:].copy_(ff)
     return [L,F]
 
-def checkpoint_restore(model,exp_name,use_cuda=True,metric='f1'):
+def checkpoint_restore(model, exp_name, use_cuda=True):
     if use_cuda:
         model.cpu()
-    epoch = 0
-    f=sorted(glob.glob(exp_name+'/bestmodel_%s_*_epoch*'%metric+'.pth'))
-    if len(f)>0:
+    epoch = -1
+    f = sorted(glob.glob(exp_name+'/model*epoch*'+'.pth'))
+    if len(f) > 0:
         checpoint=f[-1]
         print('Restore from ' + checpoint)
         model.load_state_dict(torch.load(checpoint))
-        epoch=int(checpoint[checpoint.find('epoch')+5:checpoint.find('.pth')])
+        epoch = int(checpoint[checpoint.find('epoch')+5: checpoint.find('.pth')])
     else:
         print('No existing model, starting training from scratch...')
 
     if use_cuda:
         model.cuda()
 
-    return epoch
+    return epoch + 1
 
 def is_power2(num):
     return num != 0 and ((num & (num - 1)) == 0)
@@ -158,18 +158,6 @@ def is_power2(num):
 def has_only_one_nonzero_digit(num): #https://oeis.org/A037124
     return num != 0 and (num/10**math.floor(math.log(num,10))).is_integer()
 
-def checkpoint_save(model,exp_name,name2,epoch, use_cuda=True):
-    f=exp_name+'/-%09d-'%epoch+name2+'.pth'
-    model.cpu()
-    torch.save(model.state_dict(),f)
-    if use_cuda:
-        model.cuda()
-    #remove previous checkpoints unless they are a power of 2 to save disk space
-    epoch=epoch-1
-    f=exp_name+'/-%09d-'%epoch+name2+'.pth'
-    if os.path.isfile(f):
-        if not is_power2(epoch):
-            os.remove(f)
 
 def random_rotation(dimension=3,allow_mirror=False):
     r=torch.qr(torch.randn(dimension,dimension))[0]
@@ -231,7 +219,7 @@ def checkpoint101(run_function, x, down=1):
     s=x.spatial_size//down
     return SparseConvNetTensor(f, x.metadata, s)
 
-def matplotlib_cubes(ax, positions,colors):
+def matplotlib_cubes(ax, positions):
     from mpl_toolkits.mplot3d import Axes3D
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     """
@@ -243,7 +231,7 @@ def matplotlib_cubes(ax, positions,colors):
     """
     try:
         positions=positions.numpy()
-        colors=colors.numpy()
+        # colors=colors.numpy()
         X = np.array([[[0, 1, 0], [0, 0, 0], [1, 0, 0], [1, 1, 0]],
              [[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 0, 0]],
              [[1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]],
@@ -257,8 +245,7 @@ def matplotlib_cubes(ax, positions,colors):
         ax.set_xlim([m[0],M[0]])
         ax.set_ylim([m[1],M[1]])
         ax.set_zlim([m[2],M[2]])
-        ax.add_collection3d(Poly3DCollection(X,
-                                facecolors=np.repeat(colors,6, axis=0)))
+        ax.add_collection3d(Poly3DCollection(X))
     except:
         print('matplotlibcubes fail!?!')
         pass
@@ -295,4 +282,5 @@ def visdom_scatter(vis, xyz, rgb, win='3d', markersize=3):
         xyz,
         opts={'markersize': markersize,'markercolor': rgb},
         win=win)
+
 

@@ -6,7 +6,7 @@ conda create --name pointsite_inference python=3.6 -y
 source activate pointsite_inference
 
 #-> 2. install related library
-pip install torch==1.1.0
+pip install torch==1.3.0
 conda install scikit-learn -y
 conda install tqdm -y
 
