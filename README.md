@@ -10,8 +10,8 @@ Created by [Zhen Li](https://github.com/icemansina),  [Xu Yan](https://github.co
 Tested with CUDA 10.0, Ubuntu 18.04, Python 3.6 with [Conda](https://www.anaconda.com/) and PyTorch 1.3.
 
 ```
-git clone --recursive https://github.com/PointSite/PointSite_Inference.git
-cd PointSite_Inference/
+git clone --recursive https://github.com/PointSite/PointSite.git
+cd PointSite/
 ./install.sh
 ```
 
