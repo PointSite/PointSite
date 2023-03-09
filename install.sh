@@ -9,7 +9,7 @@ source activate pointsite_inference
 pip install torch==1.3.0
 conda install scikit-learn -y
 conda install tqdm -y
-
+conda install pillow
 #-> 3. run setup
 rm -rf build/ dist/ sparseconvnet.egg-info sparseconvnet/SCN*.so
 python setup.py develop
